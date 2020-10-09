@@ -1,4 +1,10 @@
-//#include <HCSR04.h>
+
+#include <HCSR04.h>
+HCSR04 hc(11,new int[4]{6,7,8,9},4);//initialisation class HCSR04 (trig pin , echo pin, number of sensor)
+int ultraCount[4] = {0,0,0,0};
+boolean enableUltra = false;
+
+
 int enableR = 13;
 int pinR1 = 2;
 int pinR2 = 3;
@@ -11,7 +17,7 @@ int PINsensorF[5] = {A1,A2,A3,A4};
 int sensorB[5] = {0, 0, 0, 0, 0};
 int PINsensorB[5] = {A8,A9,A9,A10,A11};
 
-int SPEED = 65;
+int SPEED = 100;
 int targetState = 4;
 int x = 0;
 int state = 0;
@@ -45,6 +51,23 @@ void setup() {
 }
 
 void loop() {
+  // check if ultrasonic sensor <= 5 cm
+  if(enableUltra){
+    for(int i=1;i<=3;i++){
+      if(hc.dist(i) <= 5.0){
+        ultraCount[i]++;
+        if(ultraCount[i] >= 5){
+          stopCar();
+          ultraCount[i] = 0;
+          Serial.println("Stop 2");
+//          delay(100);
+        }
+      }else{
+        ultraCount[i] = 0;
+      }
+    }
+  }
+  
   sensorF[0] = digitalRead(A1);
   sensorF[1] = digitalRead(A2);
   sensorF[2] = digitalRead(A3);
@@ -66,14 +89,14 @@ void loop() {
     stopCar();
     x++;
   }else if(!isAtStopLocation()){
-    if(carDirection == "init"){
-      Serial.println("Forward");
+    if(carDirection == "init" || state == 0){
+//      Serial.println("Forward");
       forward();
     }else if(targetState < state){
-      Serial.println("Backward");
+//      Serial.println("Backward");
       backward();
     }else if(targetState > state){
-      Serial.println("Forward");
+//      Serial.println("Forward");
       forward();
     }
   }
