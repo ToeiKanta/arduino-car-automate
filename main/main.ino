@@ -1,4 +1,8 @@
-//#include <HCSR04.h>
+// Ultra sonic setup
+#include <HCSR04.h>
+HCSR04 hc(11,new int[4]{6,7,8,9},4);//initialisation class HCSR04 (trig pin , echo pin, number of sensor)
+
+// Pin Setup
 int enableR = 13;
 int pinR1 = 2;
 int pinR2 = 3;
@@ -56,6 +60,13 @@ void loop() {
   sensorB[2] = digitalRead(A10);
   sensorB[3] = digitalRead(A11);
   sensorB[4] = digitalRead(A12);
+  // check if ultrasonic sensor <= 5 cm
+  for(int i=0;i<=3;i++){
+    if(hc.dist(i) <= 5){
+//      stopCar();
+//      delay(7000);
+    }
+  }
   if(x==1){
     targetState = 1;
   }else if(x==2){
