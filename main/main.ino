@@ -90,6 +90,38 @@ void stopCar()
     digitalWrite(pinL2, LOW);
 }
 
+void turnLeftBackward(){
+  carDirection = "turn_left_backward";
+  if(sensorB[4] == 0){
+    analogWrite(enableR, 0); 
+    analogWrite(enableL, SPEED);
+  }else{
+    analogWrite(enableR, SPEED/2); 
+    analogWrite(enableL, SPEED);
+  }
+  digitalWrite(pinR2, HIGH);
+  digitalWrite(pinR1, LOW);
+  
+  digitalWrite(pinL2, HIGH);
+  digitalWrite(pinL1, LOW);
+}
+
+void turnRightBackward(){
+  carDirection = "turn_right_backward";
+  if(sensorB[0] == 0){
+    analogWrite(enableR, SPEED); 
+    analogWrite(enableL, 0);
+  }else {
+    analogWrite(enableR, SPEED); 
+    analogWrite(enableL, SPEED/2);
+  }
+  digitalWrite(pinR2, HIGH);
+  digitalWrite(pinR1, LOW);
+  
+  digitalWrite(pinL2, HIGH);
+  digitalWrite(pinL1, LOW);
+}
+
 void turnRightForward(){
   carDirection = "turn_right_forward";
   if(sensorF[4] == 0){
@@ -134,9 +166,9 @@ void forward()
   digitalWrite(pinL1, HIGH);
   digitalWrite(pinL2, LOW);
 
-  if(sensorF[1] == 0 && sensorF[3] != 0){
+  if((sensorF[1] == 0 && sensorF[3] != 0 ) || (sensorF[0] == 0 && sensorF[3] != 0) ){
     turnLeftForward();
-  }else if(sensorF[3] == 0  && sensorF[1] != 0){
+  }else if((sensorF[3] == 0  && sensorF[1] != 0) || (sensorF[4] == 0 && sensorF[1] != 0) ){
     turnRightForward();
   }
   
@@ -153,12 +185,18 @@ void backward()
   
   digitalWrite(pinL2, HIGH);
   digitalWrite(pinL1, LOW);
+
+  if((sensorB[1] == 0 && sensorB[3] != 0) || (sensorB[0] == 0 && sensorB[3] != 0)){
+    turnLeftBackward();
+  }else if((sensorB[3] == 0  && sensorB[1] != 0) || (sensorB[4] == 0  && sensorB[1] != 0)){
+    turnRightBackward();
+  }
 }
 
 boolean getStopSensorByDirection(){
   if(carDirection == "forward" ||carDirection == "turn_right_forward" ||carDirection == "turn_left_forward"){
     return sensorF[1] == 0 && sensorF[2] == 0 && sensorF[3] == 0;
-  }else if(carDirection == "backward"){
+  }else if(carDirection == "backward" ||carDirection == "turn_right_backward" ||carDirection == "turn_left_backward"){
     return sensorB[1] == 0 && sensorB[2] == 0 && sensorB[3] == 0;
   }
 }
@@ -183,7 +221,7 @@ void updateState(){
     state++;
     Serial.print("state ++ is ");
     Serial.println(state);
-  }else if(carDirection == "backward"){
+  }else if(carDirection == "backward" ||carDirection == "turn_right_backward" ||carDirection == "turn_left_backward"){
     state--;
     Serial.print("state -- is ");
     Serial.println(state);
