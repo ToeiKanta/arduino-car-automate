@@ -1,9 +1,9 @@
 //#include <HCSR04.h>
 int enableR = 13;
-int pinA1 = 2;
-int pinA2 = 3;
-int pinB1 = 4;
-int pinB2 = 5;
+int pinR1 = 2;
+int pinR2 = 3;
+int pinL1 = 4;
+int pinL2 = 5;
 int enableL = 12;
 
 int sensorF[5] = {0, 0, 0, 0, 0};
@@ -13,6 +13,7 @@ int PINsensorB[5] = {A8,A9,A9,A10,A11};
 
 int SPEED = 65;
 int targetState = 4;
+//int x = 0;
 int state = 0;
 boolean isAtStopLocationYet = false;
 
@@ -28,12 +29,12 @@ String carDirection = "init";
 void setup() {
   Serial.begin(9600);
   pinMode(enableR, OUTPUT);
-  pinMode(pinA1, OUTPUT);
-  pinMode(pinA2, OUTPUT);
+  pinMode(pinR1, OUTPUT);
+  pinMode(pinR2, OUTPUT);
 
   pinMode(enableL, OUTPUT);
-  pinMode(pinB1, OUTPUT);
-  pinMode(pinB2, OUTPUT);
+  pinMode(pinL1, OUTPUT);
+  pinMode(pinL2, OUTPUT);
   
   for(int i=0;i<5;i++){
     pinMode(PINsensorF[i],INPUT);
@@ -73,35 +74,43 @@ void stopCar()
 {
     carDirection == "stop";
     //Serial.println("car stop");
-    digitalWrite(pinA1, LOW);
-    digitalWrite(pinA2, LOW);
+    digitalWrite(pinR1, LOW);
+    digitalWrite(pinR2, LOW);
     
-    digitalWrite(pinB1, LOW);
-    digitalWrite(pinB2, LOW);
+    digitalWrite(pinL1, LOW);
+    digitalWrite(pinL2, LOW);
 }
 
-void turnRight(){
+void turnRightForward(){
   carDirection = "turn_right_forward";
-  analogWrite(enableR, SPEED); 
-  analogWrite(enableL, SPEED);
-
-  digitalWrite(pinA1, HIGH);
-  digitalWrite(pinA2, LOW);
+  if(sensorF[0] == 0){
+    analogWrite(enableR, 0); 
+    analogWrite(enableL, SPEED);
+  }else{
+    analogWrite(enableR, SPEED/5); 
+    analogWrite(enableL, SPEED);
+  }
+  digitalWrite(pinR1, HIGH);
+  digitalWrite(pinR2, LOW);
   
-  digitalWrite(pinB1, LOW);
-  digitalWrite(pinB2, LOW);
+  digitalWrite(pinL1, HIGH);
+  digitalWrite(pinL2, LOW);
 }
 
-void turnLeft(){
+void turnLeftForward(){
   carDirection = "turn_left_forward";
-  analogWrite(enableR, SPEED); 
-  analogWrite(enableL, SPEED);
-
-  digitalWrite(pinA1, LOW);
-  digitalWrite(pinA2, LOW);
+  if(sensorF[4] == 0){
+    analogWrite(enableR, SPEED); 
+    analogWrite(enableL, 0);
+  }else {
+    analogWrite(enableR, SPEED); 
+    analogWrite(enableL, SPEED/5);
+  }
+  digitalWrite(pinR1, HIGH);
+  digitalWrite(pinR2, LOW);
   
-  digitalWrite(pinB1, HIGH);
-  digitalWrite(pinB2, LOW);
+  digitalWrite(pinL1, HIGH);
+  digitalWrite(pinL2, LOW);
 }
 
 void forward()
@@ -110,16 +119,16 @@ void forward()
   analogWrite(enableR, SPEED); 
   analogWrite(enableL, SPEED);
 
-  digitalWrite(pinA1, HIGH);
-  digitalWrite(pinA2, LOW);
+  digitalWrite(pinR1, HIGH);
+  digitalWrite(pinR2, LOW);
   
-  digitalWrite(pinB1, HIGH);
-  digitalWrite(pinB2, LOW);
+  digitalWrite(pinL1, HIGH);
+  digitalWrite(pinL2, LOW);
 
   if(sensorF[1] == 0 && sensorF[3] != 0){
-    turnRight();
+    turnRightForward();
   }else if(sensorF[3] == 0  && sensorF[1] != 0){
-    turnLeft();
+    turnLeftForward();
   }
   
 }
@@ -130,11 +139,11 @@ void backward()
   analogWrite(enableR, SPEED); 
   analogWrite(enableL, SPEED);
 
-  digitalWrite(pinA2, HIGH);
-  digitalWrite(pinA1, LOW);
+  digitalWrite(pinR2, HIGH);
+  digitalWrite(pinR1, LOW);
   
-  digitalWrite(pinB2, HIGH);
-  digitalWrite(pinB1, LOW);
+  digitalWrite(pinL2, HIGH);
+  digitalWrite(pinL1, LOW);
 }
 
 boolean getStopSensorByDirection(){
