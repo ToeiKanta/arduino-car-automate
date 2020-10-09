@@ -1,4 +1,4 @@
-#include <HCSR04.h>
+//#include <HCSR04.h>
 int enableA = 13;
 int pinA1 = 2;
 int pinA2 = 3;
@@ -16,7 +16,7 @@ int targetState = 3;
 int state = 6;
 boolean isAtStopLocationYet = false;
 
-string carDirection = "init";
+String carDirection = "init";
 
 // todo
 // fowarding --
@@ -24,7 +24,7 @@ string carDirection = "init";
 // backwarding
 // backwarding right-left
 
-HCSR04 hc(2,3);
+//HCSR04 hc(2,3);
 void setup() {
   Serial.begin(9600);
   pinMode(enableA, OUTPUT);
@@ -50,11 +50,11 @@ void loop() {
   sensorF[3] = digitalRead(A4);
   sensorF[4] = digitalRead(A5);
 
-  sensorB[5] = digitalRead(A8);
-  sensorB[6] = digitalRead(A9);
-  sensorB[7] = digitalRead(A10);
-  sensorB[8] = digitalRead(A11);
-  sensorB[9] = digitalRead(A12);
+  sensorB[0] = digitalRead(A8);
+  sensorB[1] = digitalRead(A9);
+  sensorB[2] = digitalRead(A10);
+  sensorB[3] = digitalRead(A11);
+  sensorB[4] = digitalRead(A12);
   
   if(targetState == state){
     stopCar();
