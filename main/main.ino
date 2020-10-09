@@ -13,7 +13,7 @@ int PINsensorB[5] = {A8,A9,A9,A10,A11};
 
 int SPEED = 65;
 int targetState = 4;
-//int x = 0;
+int x = 0;
 int state = 0;
 boolean isAtStopLocationYet = false;
 
@@ -56,15 +56,24 @@ void loop() {
   sensorB[2] = digitalRead(A10);
   sensorB[3] = digitalRead(A11);
   sensorB[4] = digitalRead(A12);
-  
+  if(x==1){
+    targetState = 1;
+  }else if(x==2){
+    targetState = 4; 
+  }
   if(targetState == state){
+    Serial.println("Stop");
     stopCar();
+    x++;
   }else if(!isAtStopLocation()){
     if(carDirection == "init"){
+      Serial.println("Forward");
       forward();
     }else if(targetState < state){
+      Serial.println("Backward");
       backward();
     }else if(targetState > state){
+      Serial.println("Forward");
       forward();
     }
   }
@@ -83,11 +92,11 @@ void stopCar()
 
 void turnRightForward(){
   carDirection = "turn_right_forward";
-  if(sensorF[0] == 0){
+  if(sensorF[4] == 0){
     analogWrite(enableR, 0); 
     analogWrite(enableL, SPEED);
   }else{
-    analogWrite(enableR, SPEED/5); 
+    analogWrite(enableR, SPEED/2); 
     analogWrite(enableL, SPEED);
   }
   digitalWrite(pinR1, HIGH);
@@ -99,12 +108,12 @@ void turnRightForward(){
 
 void turnLeftForward(){
   carDirection = "turn_left_forward";
-  if(sensorF[4] == 0){
+  if(sensorF[0] == 0){
     analogWrite(enableR, SPEED); 
     analogWrite(enableL, 0);
   }else {
     analogWrite(enableR, SPEED); 
-    analogWrite(enableL, SPEED/5);
+    analogWrite(enableL, SPEED/2);
   }
   digitalWrite(pinR1, HIGH);
   digitalWrite(pinR2, LOW);
@@ -126,9 +135,9 @@ void forward()
   digitalWrite(pinL2, LOW);
 
   if(sensorF[1] == 0 && sensorF[3] != 0){
-    turnRightForward();
-  }else if(sensorF[3] == 0  && sensorF[1] != 0){
     turnLeftForward();
+  }else if(sensorF[3] == 0  && sensorF[1] != 0){
+    turnRightForward();
   }
   
 }
