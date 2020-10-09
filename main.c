@@ -58,24 +58,51 @@ void loop() {
   
   if(targetState == state){
     stopCar();
-  }else if(!isAtStopLocation() || carDirection == "init"){
-    forward();
+  }else if(!isAtStopLocation()){
+    if(carDirection == "init"){
+      forward();
+    }else if(targetState < state){
+      backward();
+    }else if(targetState > state){
+      forward();
+    }
   }
-  
 }
 
 void stopCar()
 {
-  if(carDirection == "stop")
-    return ;
+  carDirection == "stop";
   analogWrite(enableA, 0); 
   analogWrite(enableB, 0);
 }
 
+void turnRight(){
+  carDirection = "turn_right";
+  analogWrite(enableA, SPEED/2); 
+  analogWrite(enableB, SPEED/2);
+
+  digitalWrite(pinA1, LOW);
+  digitalWrite(pinA2, LOW);
+  
+  digitalWrite(pinB1, LOW);
+  digitalWrite(pinB2, LOW);
+}
+
+void turnLeft(){
+  carDirection = "turn_right";
+  analogWrite(enableA, SPEED/2); 
+  analogWrite(enableB, SPEED/2);
+
+  digitalWrite(pinA1, HIGH);
+  digitalWrite(pinA2, LOW);
+  
+  digitalWrite(pinB1, HIGH);
+  digitalWrite(pinB2, LOW);
+}
+
 void forward()
 {
-  if(carDirection == "forward")
-    return ;
+  carDirection = "forward";
   analogWrite(enableA, SPEED); 
   analogWrite(enableB, SPEED);
 
@@ -89,8 +116,7 @@ void forward()
 
 void backward()
 {
-  if(carDirection == "backward")
-    return ;
+  carDirection = "backward";
   analogWrite(enableA, SPEED); 
   analogWrite(enableB, SPEED);
 
@@ -101,20 +127,38 @@ void backward()
   digitalWrite(pinB1, LOW);
 }
 
+boolean getSensorByDirection(){
+  if(carDirection == "forward"){
+    return sensorF[1] == 0 && sensorF[2] == 0 && sensorF[3] == 0;
+  }else if(carDirection == "backward"){
+    return sensorB[1] == 0 && sensorB[2] == 0 && sensorB[3] == 0;
+  }
+}
+
 boolean isAtStopLocation()
 {
   if(isAtStopLocationYet == false){
-      if( sensorF[1] == 0 && sensorF[2] == 0 && sensorF[3] == 0 ){
+      if(getSensorByDirection()){
         isAtStopLocationYet = true;
-        state++;
-        Serial.print("state ++ is ");
-        Serial.println(state);
+        updateState();
         return true;
       }
-  }else if(!(sensorF[1] == 0 && sensorF[2] == 0 && sensorF[3] == 0)){
+  }else if(!getSensorByDirection()){
     isAtStopLocationYet = false;
     return false;
   }
   
+}
+
+void updateState(){
+  if(carDirection == "forward"){
+    state++;
+    Serial.print("state ++ is ");
+    Serial.println(state);
+  }else if(carDirection == "backward"){
+    state--;
+    Serial.print("state -- is ");
+    Serial.println(state);
+  }
 }
 
