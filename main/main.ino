@@ -27,13 +27,6 @@ boolean isAtStopLocationYet = false;
 
 String carDirection = "init";
 
-// todo
-// fowarding --
-// fowarding right-left
-// backwarding
-// backwarding right-left
-
-//HCSR04 hc(2,3);
 void setup() {
   Serial.begin(115200);
   Serial1.begin(115200);
@@ -55,11 +48,55 @@ void setup() {
 }
 
 void loop() {
-  if(Serial1.available()){
-    serial1 = Serial1.readString();
-    Serial.println(serial1);
-  }
+  recieveSerial1();
   // check if ultrasonic sensor <= 5 cm
+  ultrasonicHandle();
+  
+  sensorF[0] = digitalRead(A1);
+  sensorF[1] = digitalRead(A2);
+  sensorF[2] = digitalRead(A3);
+  sensorF[3] = digitalRead(A4);
+  sensorF[4] = digitalRead(A5);
+
+  sensorB[0] = digitalRead(A8);
+  sensorB[1] = digitalRead(A9);
+  sensorB[2] = digitalRead(A10);
+  sensorB[3] = digitalRead(A11);
+  sensorB[4] = digitalRead(A12);
+  // if(x==1){
+  //   while(digitalRead(touchSensor) == LOW){
+  //   }
+  //   x++;
+  //   targetState = 1;
+  //   Serial.println(targetState);
+  // }else if(x==3){
+  //   while(digitalRead(touchSensor) == LOW){
+  //   }
+  //   x++;
+  //   targetState = 4; 
+  //   Serial.println(targetState);
+  // }
+  if(targetState == state){
+    Serial.println("Stop");
+    stopCar();
+    while(digitalRead(touchSensor) == LOW){
+    }
+    // x++;
+  }else if(!isAtStopLocation()){
+    if(carDirection == "init" || state == 0){
+//      Serial.println("Forward");
+      forward();
+    }else if(targetState < state){
+//      Serial.println("Backward");
+      backward();
+    }else if(targetState > state){
+//      Serial.println("Forward");
+      forward();
+    }
+  }
+}
+
+void ultrasonicHandle(){
   if(enableUltra){
     for(int i=1;i<=3;i++){
       if(hc.dist(i) <= 5.0){
@@ -75,45 +112,22 @@ void loop() {
       }
     }
   }
-  
-  sensorF[0] = digitalRead(A1);
-  sensorF[1] = digitalRead(A2);
-  sensorF[2] = digitalRead(A3);
-  sensorF[3] = digitalRead(A4);
-  sensorF[4] = digitalRead(A5);
+}
 
-  sensorB[0] = digitalRead(A8);
-  sensorB[1] = digitalRead(A9);
-  sensorB[2] = digitalRead(A10);
-  sensorB[3] = digitalRead(A11);
-  sensorB[4] = digitalRead(A12);
-  if(x==1){
-    while(digitalRead(touchSensor) == LOW){
-    }
-    x++;
-    targetState = 1;
-    Serial.println(targetState);
-  }else if(x==3){
-    while(digitalRead(touchSensor) == LOW){
-    }
-    x++;
-    targetState = 4; 
-    Serial.println(targetState);
-  }
-  if(targetState == state){
-    Serial.println("Stop");
-    stopCar();
-    x++;
-  }else if(!isAtStopLocation()){
-    if(carDirection == "init" || state == 0){
-//      Serial.println("Forward");
-      forward();
-    }else if(targetState < state){
-//      Serial.println("Backward");
-      backward();
-    }else if(targetState > state){
-//      Serial.println("Forward");
-      forward();
+void recieveSerial1(){
+  if(Serial1.available()){
+    serial1 = Serial1.readString();
+    Serial.println(serial1);
+    if(serial1 == "RO1"){
+      targetState = 1;
+    }else if(serial1 == "RO2"){
+      targetState = 2;
+    }else if(serial1 == "RO3"){
+      targetState = 3;
+    }else if(serial1 == "RO4"){
+      targetState = 4;
+    }else if(serial1 == "RO5"){
+      targetState = 5;
     }
   }
 }

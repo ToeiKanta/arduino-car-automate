@@ -39,11 +39,38 @@ BLYNK_CONNECTED(){
 BLYNK_WRITE(V1){
   int buttonState = param.asInt();
   if (buttonState == 1) {
-         Serial.println("R01"); 
-         Serial1.print("R01");
-    }
+    Serial.println("R01"); 
+    Serial1.print("R01");
+  }
 }
-
+BLYNK_WRITE(V2){
+  int buttonState = param.asInt();
+  if (buttonState == 1) {
+    Serial.println("R02"); 
+    Serial1.print("R02");
+  }
+}
+BLYNK_WRITE(V3){
+  int buttonState = param.asInt();
+  if (buttonState == 1) {
+    Serial.println("R03"); 
+    Serial1.print("R03");
+  }
+}
+BLYNK_WRITE(V4){
+  int buttonState = param.asInt();
+  if (buttonState == 1) {
+    Serial.println("R04"); 
+    Serial1.print("R04");
+  }
+}
+BLYNK_WRITE(V5){
+  int buttonState = param.asInt();
+  if (buttonState == 1) {
+    Serial.println("R05"); 
+    Serial1.print("R05");
+  }
+}
 void loop(){
     Blynk.run();
 }
