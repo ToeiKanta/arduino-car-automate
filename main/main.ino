@@ -3,7 +3,9 @@
 HCSR04 hc(11,new int[4]{6,7,8,9},4);//initialisation class HCSR04 (trig pin , echo pin, number of sensor)
 int ultraCount[4] = {0,0,0,0};
 boolean enableUltra = false;
-
+// Touch sensor
+int touchSensor = 52;
+//
 
 int enableR = 13;
 int pinR1 = 2;
@@ -34,6 +36,7 @@ String carDirection = "init";
 //HCSR04 hc(2,3);
 void setup() {
   Serial.begin(9600);
+  pinMode(touchSensor, INPUT);
   pinMode(enableR, OUTPUT);
   pinMode(pinR1, OUTPUT);
   pinMode(pinR2, OUTPUT);
@@ -80,9 +83,17 @@ void loop() {
   sensorB[3] = digitalRead(A11);
   sensorB[4] = digitalRead(A12);
   if(x==1){
+    while(digitalRead(touchSensor) == LOW){
+    }
+    x++;
     targetState = 1;
-  }else if(x==2){
+    Serial.println(targetState);
+  }else if(x==3){
+    while(digitalRead(touchSensor) == LOW){
+    }
+    x++;
     targetState = 4; 
+    Serial.println(targetState);
   }
   if(targetState == state){
     Serial.println("Stop");
