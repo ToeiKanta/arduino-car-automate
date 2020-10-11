@@ -5,8 +5,8 @@ int ultraCount[4] = {0,0,0,0};
 boolean enableUltra = false;
 // Touch sensor
 int touchSensor = 52;
-//
 
+String serial1 = "";
 int enableR = 13;
 int pinR1 = 2;
 int pinR2 = 3;
@@ -35,7 +35,8 @@ String carDirection = "init";
 
 //HCSR04 hc(2,3);
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Serial1.begin(115200);
   pinMode(touchSensor, INPUT);
   pinMode(enableR, OUTPUT);
   pinMode(pinR1, OUTPUT);
@@ -54,6 +55,10 @@ void setup() {
 }
 
 void loop() {
+  if(Serial1.available()){
+    serial1 = Serial1.readString();
+    Serial.println(serial1);
+  }
   // check if ultrasonic sensor <= 5 cm
   if(enableUltra){
     for(int i=1;i<=3;i++){
