@@ -1,10 +1,17 @@
 
 #include <HCSR04.h>
+#include <stdio.h>
+
+#define MAX_OUT_CHARS 16  //max nbr of characters to be sent on any one serial command
+
+char   buffer[MAX_OUT_CHARS + 1];  //buffer used to format a line (+1 is for trailing 0)
+    
 HCSR04 hc(11,new int[4]{6,7,8,9},4);//initialisation class HCSR04 (trig pin , echo pin, number of sensor)
 int ultraCount[4] = {0,0,0,0};
 boolean enableUltra = false;
 // Touch sensor
 int touchSensor = 50;
+int touchCount = 0;
 
 String serial1 = "";
 int enableR = 13;
@@ -20,11 +27,11 @@ int sensorB[5] = {0, 0, 0, 0, 0};
 int PINsensorB[5] = {A8,A9,A9,A10,A11};
 
 int SPEED = 100;
-int targetState = 4;
+int targetState = 0;
 int x = 0;
 int state = 0;
 boolean isAtStopLocationYet = false;
-
+boolean isGoingTargetSuccess = false;
 String carDirection = "init";
 
 void setup() {
@@ -45,9 +52,12 @@ void setup() {
   for(int i=0;i<5;i++){
     pinMode(PINsensorB[i],INPUT);
   }
+  delay(1000);
+  Serial1.print("init");
   while(digitalRead(touchSensor) == LOW){
     }
-    Serial.println("Start");
+    Serial.println("start");
+    Serial1.print("start");
     forward();
 }
 
@@ -67,27 +77,28 @@ void loop() {
   sensorB[2] = digitalRead(A10);
   sensorB[3] = digitalRead(A11);
   sensorB[4] = digitalRead(A12);
-  
-  if(targetState == state){
-    Serial.println("Stop");
-    stopCar();
-    while(digitalRead(touchSensor) == LOW){
-    }
-    // x++;
-  }else if(!isAtStopLocation()){
-    if(carDirection == "init" || state == 0){
-//      Serial.println("Forward");
-      forward();
-    }else if(targetState < state){
-//      Serial.println("Backward");
-      backward();
-    }else if(targetState > state){
-//      Serial.println("Forward");
-      forward();
-    }
+  if(digitalRead(touchSensor) == HIGH && ++touchCount <= 1){
+    isGoingTargetSuccess = false;
+  }
+  if(!isGoingTargetSuccess){
+     if(targetState == state && carDirection != "init"){
+        Serial.println("success... please touch the sensor");
+        touchCount = 0;
+        isGoingTargetSuccess = true;
+        stopCar();
+        delay(1000);
+        Serial1.print("success");
+      }else if(!isAtStopLocation()){
+        if(targetState < state){
+    //      Serial.println("Backward");
+          backward();
+        }else if(targetState > state){
+    //      Serial.println("Forward");
+          forward();
+        }
+      }
   }
 }
-
 void ultrasonicHandle(){
   if(enableUltra){
     for(int i=1;i<=3;i++){
@@ -112,14 +123,24 @@ void recieveSerial1(){
     Serial.println(serial1);
     if(serial1 == "R01"){
       targetState = 1;
+      Serial.println("send R to NodeMCU");
+      Serial1.print("R");
     }else if(serial1 == "R02"){
       targetState = 2;
+      Serial.println("send R to NodeMCU");
+      Serial1.print("R");
     }else if(serial1 == "R03"){
       targetState = 3;
+      Serial.println("send R to NodeMCU");
+      Serial1.print("R");
     }else if(serial1 == "R04"){
       targetState = 4;
+      Serial.println("send R to NodeMCU");
+      Serial1.print("R");
     }else if(serial1 == "R05"){
+      Serial.println("send R to NodeMCU");
       targetState = 5;
+      Serial1.print("R");
     }
   }
 }
@@ -264,10 +285,16 @@ boolean isAtStopLocation()
 void updateState(){
   if(carDirection == "forward" ||carDirection == "turn_right_forward" ||carDirection == "turn_left_forward"){
     state++;
+    String room = "R0" + String(state);
+    Serial1.print(room);
+//    Serial1.print("R0"+state);
     Serial.print("state ++ is ");
     Serial.println(state);
   }else if(carDirection == "backward" ||carDirection == "turn_right_backward" ||carDirection == "turn_left_backward"){
     state--;
+    String room = "R0" + String(state);
+    Serial1.print(room);
+//    Serial1.print("R0"+state);
     Serial.print("state -- is ");
     Serial.println(state);
   }
