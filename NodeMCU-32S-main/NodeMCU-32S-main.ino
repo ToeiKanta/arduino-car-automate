@@ -1,9 +1,9 @@
 /* Comment this out to disable prints and save space */
 #define BLYNK_PRINT Serial
 
-#include <Wire.h>
+//#include <Wire.h>
 #include <WiFi.h>
-#include <WiFiClient.h>
+//#include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 #include <BlynkSimpleEsp32.h>
 
@@ -162,7 +162,7 @@ void recieveSerial1(){
             if(str == "success"){
                terminal.print("Going to ROOM ");
                terminal.print(String(targetRoom));
-               String msg = "โปรดมารับอาหารและยาค่ะ";
+               String msg = "โปรดมารับอาหารและยาค่ะ (เมื่อรับเสร็จแล้ว กรุณากดที่ปุ่มข้างถาดนะคะ)";
                switch(targetRoom){
                  case 1: NotifyLine(msg,TokenLineRoom1);break;
                  case 2: NotifyLine(msg,TokenLineRoom2);break;
@@ -236,6 +236,18 @@ void recieveSerial1(){
       
     }
 }
+
+
+BLYNK_WRITE(V52){
+  int buttonState = param.asInt();
+  if (buttonState == 1) {
+    Serial.println("send command FT (Force Touch)"); 
+    Serial1.print("FT,");
+    terminal.print("Sending command Force Touch...");
+    terminal.flush();
+  }
+}
+
 BLYNK_WRITE(V6){
   int buttonState = param.asInt();
   if (buttonState == 1) {

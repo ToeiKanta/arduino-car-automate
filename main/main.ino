@@ -174,6 +174,10 @@ void recieveSerial1() {
             Serial.println("send R to NodeMCU");
             targetState = 6;
             Serial1.print("R,");
+          } else if (str == "FT") {
+            isTouched = true;
+            Serial.println("send R to NodeMCU");
+            Serial1.print("R,");
           }
         }
         str = "";
