@@ -4,15 +4,23 @@
 #include <Wire.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
+#include <WiFiClientSecure.h>
 #include <BlynkSimpleEsp32.h>
 
 WidgetTerminal terminal(V50);
 
 const boolean DEBUG_LOG = false;
+// Line Token
+#define TokenLineRoom1 "FOAyf34EQQdDbNBrSoGjZLWYtOPVF9geBhLb9FarBkQ" 
+#define TokenLineRoom2 "J9wVMSm1FTthoUJLhEsA0RKcknRixIIC5H3sIXSeg88"
+#define TokenLineRoom3 "VjGub9wQpu6KunXccNyffVTosveGOEhCObmpippvcJz"
+#define TokenLineRoom4 "sPAI8Qds06UyPbWRNUybDclg8KCwHq0aDFrsiKqTrIZ"
+#define TokenLineRoom5 "olagkzAOHxEwrxPMqwrN7ynitjGCGJzcDKiT7PyaG67"
+#define TokenLineRoom6 "dCfpnmQMxAtgEoj7g2zdl6Cg8jZ98ry80TNEbDQdBcG"
 
 char auth[] = "YpzVX9uZtN0lnd6cnyWbFJAMC7bAihIe";
-char ssid[] = "gkamspri";
-char pass[] = "0979934765";
+char ssid[] = "Euangngam710";//"gkamspri";
+char pass[] = "enplace710";//0979934765
 
 BlynkTimer timer;
 boolean isMegaConnected = false;
@@ -57,6 +65,33 @@ void setup() {
  isMegaConnected = false;
 }
 
+void NotifyLine(String t,String TokenLine){
+  WiFiClientSecure client;
+  if (!client.connect("notify-api.line.me", 443)) {
+    Serial.println("Connection failed");
+    return;
+  }
+  String req = "";
+  req += "POST /api/notify HTTP/1.1\r\n";
+  req += "Host: notify-api.line.me\r\n";
+  req += "Authorization: Bearer " + String(TokenLine) + "\r\n";
+  req += "Cache-Control: no-cache\r\n";
+  req += "User-Agent: ESP32\r\n";
+  req += "Content-Type: application/x-www-form-urlencoded\r\n";
+  req += "Content-Length: " + String(String("message=" + t).length()) + "\r\n";
+  req += "\r\n";
+  req += "message=" + t;
+  Serial.println(req);
+  client.print(req);
+  delay(20);
+  Serial.println("-------------");
+  while (client.connected()) {
+    String line = client.readStringUntil('\n');
+    if (line == "\r") {
+      break;
+    }
+  }
+}
 //BLYNK_CONNECTED(){
 //  Blynk.syncVirtual(V1);
 //  Blynk.syncVirtual(V2);
@@ -127,6 +162,15 @@ void recieveSerial1(){
             if(str == "success"){
                terminal.print("Going to ROOM ");
                terminal.print(String(targetRoom));
+               String msg = "โปรดมารับอาหารและยาค่ะ";
+               switch(targetRoom){
+                 case 1: NotifyLine(msg,TokenLineRoom1);break;
+                 case 2: NotifyLine(msg,TokenLineRoom2);break;
+                 case 3: NotifyLine(msg,TokenLineRoom3);break;
+                 case 4: NotifyLine(msg,TokenLineRoom4);break;
+                 case 5: NotifyLine(msg,TokenLineRoom5);break;
+                 case 6: NotifyLine(msg,TokenLineRoom6);break;
+               }
                terminal.println(" success!!");
                terminal.println("Please touch the sensor to continue.");
                terminal.flush();
@@ -258,9 +302,15 @@ BLYNK_WRITE(V5){
 }
 void loop(){
 //  if(isMegaConnected == false){
-////    terminal.print(".......");
+// //    terminal.print(".......");
 //  }else if(count == 0){
 //    terminal.println("Mega Connected!");
+//    NotifyLine("Test line connected!",TokenLineRoom1);
+//    NotifyLine("Test line connected!",TokenLineRoom2);
+//    NotifyLine("Test line connected!",TokenLineRoom3);
+//    NotifyLine("Test line connected!",TokenLineRoom4);
+//    NotifyLine("Test line connected!",TokenLineRoom5);
+//    NotifyLine("Test line connected!",TokenLineRoom6);
 //    terminal.flush();
 //    count++;
 //  }
