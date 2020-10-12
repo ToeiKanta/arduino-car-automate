@@ -4,7 +4,7 @@ HCSR04 hc(11,new int[4]{6,7,8,9},4);//initialisation class HCSR04 (trig pin , ec
 int ultraCount[4] = {0,0,0,0};
 boolean enableUltra = false;
 // Touch sensor
-int touchSensor = 52;
+int touchSensor = 50;
 
 String serial1 = "";
 int enableR = 13;
@@ -38,20 +38,24 @@ void setup() {
   pinMode(enableL, OUTPUT);
   pinMode(pinL1, OUTPUT);
   pinMode(pinL2, OUTPUT);
-  
+  Serial.println("init");
   for(int i=0;i<5;i++){
     pinMode(PINsensorF[i],INPUT);
   }
   for(int i=0;i<5;i++){
     pinMode(PINsensorB[i],INPUT);
   }
+  while(digitalRead(touchSensor) == LOW){
+    }
+    Serial.println("Start");
+    forward();
 }
 
 void loop() {
   recieveSerial1();
   // check if ultrasonic sensor <= 5 cm
   ultrasonicHandle();
-  
+//  Serial.println(digitalRead(touchSensor));
   sensorF[0] = digitalRead(A1);
   sensorF[1] = digitalRead(A2);
   sensorF[2] = digitalRead(A3);
@@ -63,19 +67,7 @@ void loop() {
   sensorB[2] = digitalRead(A10);
   sensorB[3] = digitalRead(A11);
   sensorB[4] = digitalRead(A12);
-  // if(x==1){
-  //   while(digitalRead(touchSensor) == LOW){
-  //   }
-  //   x++;
-  //   targetState = 1;
-  //   Serial.println(targetState);
-  // }else if(x==3){
-  //   while(digitalRead(touchSensor) == LOW){
-  //   }
-  //   x++;
-  //   targetState = 4; 
-  //   Serial.println(targetState);
-  // }
+  
   if(targetState == state){
     Serial.println("Stop");
     stopCar();
@@ -118,15 +110,15 @@ void recieveSerial1(){
   if(Serial1.available()){
     serial1 = Serial1.readString();
     Serial.println(serial1);
-    if(serial1 == "RO1"){
+    if(serial1 == "R01"){
       targetState = 1;
-    }else if(serial1 == "RO2"){
+    }else if(serial1 == "R02"){
       targetState = 2;
-    }else if(serial1 == "RO3"){
+    }else if(serial1 == "R03"){
       targetState = 3;
-    }else if(serial1 == "RO4"){
+    }else if(serial1 == "R04"){
       targetState = 4;
-    }else if(serial1 == "RO5"){
+    }else if(serial1 == "R05"){
       targetState = 5;
     }
   }

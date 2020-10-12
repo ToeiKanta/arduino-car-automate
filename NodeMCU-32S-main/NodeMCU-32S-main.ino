@@ -6,6 +6,8 @@
 #include <WiFiClient.h>
 #include <BlynkSimpleEsp32.h>
 
+WidgetTerminal terminal(V50);
+
 char auth[] = "YpzVX9uZtN0lnd6cnyWbFJAMC7bAihIe";
 char ssid[] = "Euangngam710";
 char pass[] = "enplace710";
@@ -19,7 +21,7 @@ void setup() {
   Serial1.println("NodeMCU connected...");
   pinMode(pin, OUTPUT);
   pinMode(pin, HIGH);
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(10);
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -29,8 +31,13 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+  
  Serial.println("WiFi connected"); 
  Blynk.begin(auth, ssid, pass);
+
+ terminal.clear();
+terminal.println("NodeMCU connected");
+//terminal.flush();
 }
 
 BLYNK_CONNECTED(){
@@ -41,6 +48,8 @@ BLYNK_WRITE(V1){
   if (buttonState == 1) {
     Serial.println("R01"); 
     Serial1.print("R01");
+    terminal.println("Set target to room 1");
+    terminal.flush();
   }
 }
 BLYNK_WRITE(V2){
@@ -48,6 +57,8 @@ BLYNK_WRITE(V2){
   if (buttonState == 1) {
     Serial.println("R02"); 
     Serial1.print("R02");
+    terminal.println("Set target to room 2");
+    terminal.flush();
   }
 }
 BLYNK_WRITE(V3){
@@ -55,6 +66,8 @@ BLYNK_WRITE(V3){
   if (buttonState == 1) {
     Serial.println("R03"); 
     Serial1.print("R03");
+    terminal.println("Set target to room 3");
+    terminal.flush();
   }
 }
 BLYNK_WRITE(V4){
@@ -62,6 +75,8 @@ BLYNK_WRITE(V4){
   if (buttonState == 1) {
     Serial.println("R04"); 
     Serial1.print("R04");
+    terminal.println("Set target to room 4");
+    terminal.flush();
   }
 }
 BLYNK_WRITE(V5){
@@ -69,6 +84,8 @@ BLYNK_WRITE(V5){
   if (buttonState == 1) {
     Serial.println("R05"); 
     Serial1.print("R05");
+    terminal.println("Set target to room 5");
+    terminal.flush();
   }
 }
 void loop(){
