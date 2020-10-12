@@ -8,7 +8,7 @@
 
 WidgetTerminal terminal(V50);
 
-const boolean DEBUG_LOG = true;
+const boolean DEBUG_LOG = false;
 
 char auth[] = "YpzVX9uZtN0lnd6cnyWbFJAMC7bAihIe";
 char ssid[] = "gkamspri";
@@ -74,8 +74,8 @@ void setDefaultRoomBtn(bool resetRoom){
     Blynk.setProperty(V52,"onLabel","ROOM 0");
     Blynk.setProperty(V52,"offLabel","ROOM 0");
   }
-  Blynk.setProperty(V0,"onLabel","GO");
-  Blynk.setProperty(V0,"offLabel","GO");
+//  Blynk.setProperty(V0,"onLabel","GO");
+//  Blynk.setProperty(V0,"offLabel","GO");
   Blynk.setProperty(V1,"onLabel","GO");
   Blynk.setProperty(V1,"offLabel","GO");
   Blynk.setProperty(V2,"onLabel","GO");
@@ -86,10 +86,12 @@ void setDefaultRoomBtn(bool resetRoom){
   Blynk.setProperty(V4,"offLabel","GO");
   Blynk.setProperty(V5,"onLabel","GO");
   Blynk.setProperty(V5,"offLabel","GO");
+  Blynk.setProperty(V6,"onLabel","GO");
+  Blynk.setProperty(V6,"offLabel","GO");
 }
 void setWaitRoomBtn(){
-  Blynk.setProperty(V0,"onLabel","Wait...");
-  Blynk.setProperty(V0,"offLabel","Wait...");
+//  Blynk.setProperty(V0,"onLabel","Wait...");
+//  Blynk.setProperty(V0,"offLabel","Wait...");
   Blynk.setProperty(V1,"onLabel","Wait...");
   Blynk.setProperty(V1,"offLabel","Wait...");
   Blynk.setProperty(V2,"onLabel","Wait...");
@@ -100,6 +102,8 @@ void setWaitRoomBtn(){
   Blynk.setProperty(V4,"offLabel","Wait...");
   Blynk.setProperty(V5,"onLabel","Wait...");
   Blynk.setProperty(V5,"offLabel","Wait...");
+  Blynk.setProperty(V6,"onLabel","Wait...");
+  Blynk.setProperty(V6,"offLabel","Wait...");
 }
 void recieveSerial1(){
     if(Serial1.available()){
@@ -169,6 +173,11 @@ void recieveSerial1(){
               Blynk.setProperty(V51,"offLabel","ROOM 5");
               Blynk.setProperty(V51,"onLabel","ROOM 5");
               terminal.println("Reaching to Room 5");
+              terminal.flush();
+            }else if(str == "R06"){ // send current room
+              Blynk.setProperty(V51,"offLabel","ROOM 6");
+              Blynk.setProperty(V51,"onLabel","ROOM 6");
+              terminal.println("Reaching to Room 6");
               terminal.flush();
             }
           }

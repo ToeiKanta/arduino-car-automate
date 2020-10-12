@@ -170,6 +170,10 @@ void recieveSerial1() {
             Serial.println("send R to NodeMCU");
             targetState = 5;
             Serial1.print("R,");
+          } else if (str == "R06") {
+            Serial.println("send R to NodeMCU");
+            targetState = 6;
+            Serial1.print("R,");
           }
         }
         str = "";
@@ -193,7 +197,7 @@ void stopCar()
 }
 void turnLeftBackwardFast() {
   carDirection = "turn_left_backward";
-  analogWrite(enableR, 80);//0
+  analogWrite(enableR, SPEED/2);//0
   analogWrite(enableL, SPEED);
   
   digitalWrite(pinR2, LOW);//x
@@ -220,7 +224,7 @@ void turnLeftBackwardFast() {
 void turnRightBackwardFast() {
   carDirection = "turn_right_backward";
   analogWrite(enableR, SPEED);
-  analogWrite(enableL, 70);//0
+  analogWrite(enableL, SPEED/2);//0
   
   digitalWrite(pinR2, HIGH);
   digitalWrite(pinR1, LOW);
@@ -278,7 +282,7 @@ void turnRightBackwardFast() {
 
 void turnLeftForwardFast(){
   analogWrite(enableR, SPEED);
-  analogWrite(enableL, SPEED);//0
+  analogWrite(enableL, SPEED/2);//0
     
   digitalWrite(pinR1, HIGH);
   digitalWrite(pinR2, LOW);
@@ -287,7 +291,7 @@ void turnLeftForwardFast(){
   digitalWrite(pinL2, HIGH);//x
 }
 void turnRightForwardFast(){
-  analogWrite(enableR, SPEED);//0
+  analogWrite(enableR, SPEED/2);//0
   analogWrite(enableL, SPEED);
   
   digitalWrite(pinR1, LOW);//x
