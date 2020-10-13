@@ -8,7 +8,11 @@ char   buffer[MAX_OUT_CHARS + 1];  //buffer used to format a line (+1 is for tra
 
 HCSR04 hc(11, new int[4] {6, 7, 8, 9}, 4); //initialisation class HCSR04 (trig pin , echo pin, number of sensor)
 int ultraCount[4] = {0, 0, 0, 0};
-boolean enableUltra = false;
+// Ultrasonic
+const boolean enableUltra = true;
+const boolean enableUltraLog = false;
+int prevCarMode = 0;
+boolean forceStop = false;
 // Touch sensor
 int touchSensor = 50;
 boolean isTouched = false;
@@ -27,6 +31,7 @@ int sensorB[5] = {0, 0, 0, 0, 0};
 int PINsensorB[5] = {A8, A9, A9, A10, A11};
 
 int carMode = 1;// 1 stop, 2 move forward, 3 move backward 
+
 int SPEED = 255;
 int prevState = 0;
 int targetState = 0;
@@ -94,7 +99,7 @@ void loop() {
       carMode = 1;
 //      delay(1000);
       Serial1.print("success,");
-    } else {
+    } else if(!forceStop){
       if (targetState < state) {
         carMode = 3;
       } else if (targetState > state) {
@@ -102,8 +107,8 @@ void loop() {
       }
     }
   }
-  
-  if(carMode == 1){
+
+  if(carMode == 1 || forceStop == true){
     stopCar();
   }else if(carMode == 2){
     checkStopLocation();
@@ -113,20 +118,43 @@ void loop() {
     backward();
   }
 }
-void ultrasonicHandle() {
+void ultrasonicHandle() 
+{
+//  Serial.println(carMode);
+  delay(50);
   if (enableUltra) {
-    for (int i = 1; i <= 3; i++) {
-      if (hc.dist(i) <= 5.0) {
+    if(enableUltraLog)
+      Serial.print("ultra: ");
+    for (int i = 0; i <= 0; i++) {
+      float val = hc.dist(i);
+      if(enableUltraLog){
+        Serial.print(val);
+        Serial.print(" ");
+      }
+      
+      if (val <= 15.0) {
         ultraCount[i]++;
-        if (ultraCount[i] >= 5) {
-          stopCar();
+        if (carMode != 1 && ultraCount[i] >= 1) {
+          prevCarMode = carMode;
           ultraCount[i] = 0;
-          Serial.println("Stop 2");
+          carMode = 1;
+          forceStop = true;
+          Serial.print("Stop by ultrasonic no.");
+          Serial.print(i);
+          Serial.print(" by ");
+          Serial.println(val);
           //          delay(100);
         }
       } else {
+        forceStop = false;
         ultraCount[i] = 0;
+        if(carMode != 1){
+          carMode = prevCarMode;
+        }
       }
+    }
+    if(enableUltraLog){
+      Serial.println("");
     }
   }
 }
