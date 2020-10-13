@@ -9,7 +9,7 @@
 
 WidgetTerminal terminal(V50);
 
-const boolean DEBUG_LOG = false;
+boolean DEBUG_LOG = true;
 // Line Token
 #define TokenLineRoom1 "FOAyf34EQQdDbNBrSoGjZLWYtOPVF9geBhLb9FarBkQ" 
 #define TokenLineRoom2 "J9wVMSm1FTthoUJLhEsA0RKcknRixIIC5H3sIXSeg88"
@@ -17,10 +17,11 @@ const boolean DEBUG_LOG = false;
 #define TokenLineRoom4 "sPAI8Qds06UyPbWRNUybDclg8KCwHq0aDFrsiKqTrIZ"
 #define TokenLineRoom5 "olagkzAOHxEwrxPMqwrN7ynitjGCGJzcDKiT7PyaG67"
 #define TokenLineRoom6 "dCfpnmQMxAtgEoj7g2zdl6Cg8jZ98ry80TNEbDQdBcG"
+//const int resetMegaPin = 34;
 
 char auth[] = "YpzVX9uZtN0lnd6cnyWbFJAMC7bAihIe";
-char ssid[] = "Euangngam710";//"gkamspri";
-char pass[] = "enplace710";//0979934765
+char ssid[] = "Euangngam710";//"gkamspri"; // Euangngam710
+char pass[] = "enplace710";//0979934765; // enplace710
 
 BlynkTimer timer;
 boolean isMegaConnected = false;
@@ -29,14 +30,15 @@ int count = 0;
 int targetRoom = 0;
 int tempTargetRoom = 0;
 String serial1 = "";
-int pin = 2;
+int ledPin = 2;
 
 void setup() { 
   Serial1.begin(115200);
   Serial1.println("NodeMCU connected...,");
-  
-  pinMode(pin, OUTPUT);
-  pinMode(pin, HIGH);
+//  pinMode(resetMegaPin, OUTPUT);
+//  digitalWrite(resetMegaPin,HIGH);
+  pinMode(ledPin, OUTPUT);
+  pinMode(ledPin, LOW);
   Serial.begin(115200);
   delay(10);
   Serial.print("Connecting to ");
@@ -48,7 +50,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  
+  digitalWrite(ledPin, HIGH);
  Serial.println("WiFi connected"); 
  Blynk.begin(auth, ssid, pass);
   delay(1000);
@@ -56,15 +58,21 @@ void setup() {
     delay(100);
   }
   delay(100);
+   
  terminal.clear();
  terminal.print("WiFi connected to -> ");
  terminal.println(ssid);
  terminal.println("NodeMCU connected");
  terminal.flush();
  setDefaultRoomBtn(true);
- isMegaConnected = false;
+// resetMegaBoard();
 }
-
+//
+//void resetMegaBoard(){
+// isMegaConnected = false;
+// delay(2000);
+// digitalWrite(resetMegaPin,LOW);//reset Mega board
+//}
 void NotifyLine(String t,String TokenLine){
   WiFiClientSecure client;
   if (!client.connect("notify-api.line.me", 443)) {
@@ -155,6 +163,7 @@ void recieveSerial1(){
             Serial.print("receive: ");
             Serial.println(str);
             if(DEBUG_LOG){
+              terminal.println("");
               terminal.print("receive: ");
               terminal.println(str);
               terminal.flush();
@@ -193,32 +202,32 @@ void recieveSerial1(){
               Blynk.setProperty(V52,"offLabel",target);
               terminal.println("OK!");
               terminal.flush();
-            }else if(str == "R01"){ // send current room
+            }else if(str == "R1"){ // send current room
               Blynk.setProperty(V51,"offLabel","ROOM 1");
               Blynk.setProperty(V51,"onLabel","ROOM 1");
               terminal.println("Reaching to Room 1");
               terminal.flush();
-            }else if(str == "R02"){ // send current room
+            }else if(str == "R2"){ // send current room
               Blynk.setProperty(V51,"offLabel","ROOM 2");
               Blynk.setProperty(V51,"onLabel","ROOM 2");
               terminal.println("Reaching to Room 2");
               terminal.flush();
-            }else if(str == "R03"){ // send current room
+            }else if(str == "R3"){ // send current room
               Blynk.setProperty(V51,"offLabel","ROOM 3");
               Blynk.setProperty(V51,"onLabel","ROOM 3");
               terminal.println("Reaching to Room 3");
               terminal.flush();
-            }else if(str == "R04"){ // send current room
+            }else if(str == "R4"){ // send current room
               Blynk.setProperty(V51,"offLabel","ROOM 4");
               Blynk.setProperty(V51,"onLabel","ROOM 4");
               terminal.println("Reaching to Room 4");
               terminal.flush();
-            }else if(str == "R05"){ // send current room
+            }else if(str == "R5"){ // send current room
               Blynk.setProperty(V51,"offLabel","ROOM 5");
               Blynk.setProperty(V51,"onLabel","ROOM 5");
               terminal.println("Reaching to Room 5");
               terminal.flush();
-            }else if(str == "R06"){ // send current room
+            }else if(str == "R6"){ // send current room
               Blynk.setProperty(V51,"offLabel","ROOM 6");
               Blynk.setProperty(V51,"onLabel","ROOM 6");
               terminal.println("Reaching to Room 6");
@@ -238,11 +247,21 @@ void recieveSerial1(){
 }
 
 
+BLYNK_WRITE(V51){
+  int buttonState = param.asInt();
+  if (buttonState == 1) {
+    Serial.println("Toggle debug mode"); 
+    DEBUG_LOG = !DEBUG_LOG;
+    terminal.println("Toggle debug mode");
+    terminal.flush();
+  }
+}
 BLYNK_WRITE(V52){
   int buttonState = param.asInt();
   if (buttonState == 1) {
     Serial.println("send command FT (Force Touch)"); 
     Serial1.print("FT,");
+     Serial1.flush();
     terminal.print("Sending command Force Touch...");
     terminal.flush();
   }
@@ -251,8 +270,9 @@ BLYNK_WRITE(V52){
 BLYNK_WRITE(V6){
   int buttonState = param.asInt();
   if (buttonState == 1) {
-    Serial.println("R06"); 
-    Serial1.print("R06,");
+    Serial.println("R6"); 
+    Serial1.print("R6,");
+    Serial1.flush();
     tempTargetRoom = 6;
     terminal.print("Set target to room 6...");
     terminal.flush();
@@ -261,9 +281,9 @@ BLYNK_WRITE(V6){
 BLYNK_WRITE(V1){
   int buttonState = param.asInt();
   if (buttonState == 1) {
-    Serial.println("R01"); 
-    Serial1.print("R01,");
-    
+    Serial.println("R1"); 
+    Serial1.print("R1,");
+     Serial1.flush();
     tempTargetRoom = 1;
     terminal.print("Set target to room 1...");
     terminal.flush();
@@ -272,9 +292,9 @@ BLYNK_WRITE(V1){
 BLYNK_WRITE(V2){
   int buttonState = param.asInt();
   if (buttonState == 1) {
-    Serial.println("R02"); 
-    Serial1.print("R02,");
-    
+    Serial.println("R2"); 
+    Serial1.print("R2,");
+     Serial1.flush();
     tempTargetRoom = 2;
     terminal.print("Set target to room 2...");
     terminal.flush();
@@ -283,9 +303,9 @@ BLYNK_WRITE(V2){
 BLYNK_WRITE(V3){
   int buttonState = param.asInt();
   if (buttonState == 1) {
-    Serial.println("R03"); 
-    Serial1.print("R03,");
-    
+    Serial.println("R3"); 
+    Serial1.print("R3,");
+     Serial1.flush();
     tempTargetRoom = 3;
     terminal.print("Set target to room 3...");
     terminal.flush();
@@ -294,8 +314,9 @@ BLYNK_WRITE(V3){
 BLYNK_WRITE(V4){
   int buttonState = param.asInt();
   if (buttonState == 1) {
-    Serial.println("R04"); 
-    Serial1.print("R04,");
+    Serial.println("R4"); 
+    Serial1.print("R4,");
+     Serial1.flush();
     tempTargetRoom = 4;
     terminal.print("Set target to room 4...");
     terminal.flush();
@@ -305,8 +326,9 @@ BLYNK_WRITE(V4){
 BLYNK_WRITE(V5){
   int buttonState = param.asInt();
   if (buttonState == 1) {
-    Serial.println("R05"); 
-    Serial1.print("R05,");
+    Serial.println("R5"); 
+    Serial1.print("R5,");
+     Serial1.flush();
     tempTargetRoom = 5;
     terminal.print("Set target to room 5...");
     terminal.flush();
@@ -314,17 +336,15 @@ BLYNK_WRITE(V5){
 }
 void loop(){
 //  if(isMegaConnected == false){
-// //    terminal.print(".......");
+//    terminal.print(".");
+//    delay(50);
 //  }else if(count == 0){
 //    terminal.println("Mega Connected!");
-//    NotifyLine("Test line connected!",TokenLineRoom1);
-//    NotifyLine("Test line connected!",TokenLineRoom2);
-//    NotifyLine("Test line connected!",TokenLineRoom3);
-//    NotifyLine("Test line connected!",TokenLineRoom4);
-//    NotifyLine("Test line connected!",TokenLineRoom5);
-//    NotifyLine("Test line connected!",TokenLineRoom6);
 //    terminal.flush();
 //    count++;
+//  }
+//  if(isMegaConnected){
+//    digitalWrite(resetMegaPin, HIGH);
 //  }
     recieveSerial1();
     Blynk.run();

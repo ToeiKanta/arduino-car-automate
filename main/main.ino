@@ -5,16 +5,16 @@
 #define MAX_OUT_CHARS 16  //max nbr of characters to be sent on any one serial command
 
 char   buffer[MAX_OUT_CHARS + 1];  //buffer used to format a line (+1 is for trailing 0)
-
-HCSR04 hc(11, new int[4] {6, 7, 8, 9}, 4); //initialisation class HCSR04 (trig pin , echo pin, number of sensor)
-int ultraCount[4] = {0, 0, 0, 0};
 // Ultrasonic
+// pin 6 front , pin 7 back
+HCSR04 hc(11, new int[2] {6, 7}, 2); //initialisation class HCSR04 (trig pin , echo pin, number of sensor)
+int ultraCount[2] = {0, 0};
 const boolean enableUltra = true;
 const boolean enableUltraLog = false;
 int prevCarMode = 0;
 boolean forceStop = false;
 // Touch sensor
-int touchSensor = 50;
+int touchSensor[5] = {22,24,26,30,34};
 boolean isTouched = false;
 
 String serial1 = "";
@@ -43,7 +43,10 @@ String carDirection = "init";
 void setup() {
   Serial.begin(115200);
   Serial1.begin(115200);
-  pinMode(touchSensor, INPUT);
+ 
+  for (int i = 0; i < 5; i++) {
+     pinMode(touchSensor[i], INPUT);
+  }
   pinMode(enableR, OUTPUT);
   pinMode(pinR1, OUTPUT);
   pinMode(pinR2, OUTPUT);
@@ -61,7 +64,8 @@ void setup() {
  delay(2000);
   Serial1.print("init,");
   delay(2000);
-  while (digitalRead(touchSensor) == LOW) {
+  while (isSensorTouched() == false) {
+    delay(100);
   }
   Serial.println("start");
   Serial1.print("start,");
@@ -82,12 +86,28 @@ void setupSensor(){
   sensorB[4] = digitalRead(A12);
 }
 
+boolean isSensorTouched(){
+  for(int i = 0 ; i<5; i++){
+      if(digitalRead(touchSensor[i]) == HIGH){
+        return true;
+      }
+    }
+   return false;
+}
 void loop() {
+  /** Check Touch Sensor **/
+//  while(true){
+//    for(int i = 0 ; i<5; i++){
+//      Serial.print(digitalRead(touchSensor[i]));
+//    }
+//    Serial.println("");
+//    delay(100);
+//  }
   recieveSerial1();
   // check if ultrasonic sensor <= 5 cm
   ultrasonicHandle();
   setupSensor();
-  if (digitalRead(touchSensor) == HIGH && isTouched == false) {
+  if (isSensorTouched() && isTouched == false) {
     isTouched = true;
   }
   if (isTouched) {
@@ -107,7 +127,6 @@ void loop() {
       }
     }
   }
-
   if(carMode == 1 || forceStop == true){
     stopCar();
   }else if(carMode == 2){
@@ -121,38 +140,45 @@ void loop() {
 void ultrasonicHandle() 
 {
 //  Serial.println(carMode);
-  delay(50);
+//  delay(50);
   if (enableUltra) {
-    if(enableUltraLog)
+    if(enableUltraLog){
       Serial.print("ultra: ");
-    for (int i = 0; i <= 0; i++) {
-      float val = hc.dist(i);
-      if(enableUltraLog){
-        Serial.print(val);
-        Serial.print(" ");
-      }
+    }
+    int hcSensor = 0;
+    if(targetState < state){
+      hcSensor = 1; //choose back ultrasonic
+    }else{
+      hcSensor = 0; //choose front ultrasonic
+    }
+//    for (int i = 1; i <= 1; i++) {
+    float val = hc.dist(hcSensor);
+    if(enableUltraLog){
+      Serial.print(val);
+      Serial.print(" ");
+    }
       
       if (val <= 15.0) {
-        ultraCount[i]++;
-        if (carMode != 1 && ultraCount[i] >= 1) {
+        ultraCount[hcSensor]++;
+        if (carMode != 1 && ultraCount[hcSensor] >= 1) {
           prevCarMode = carMode;
-          ultraCount[i] = 0;
+          ultraCount[hcSensor] = 0;
           carMode = 1;
           forceStop = true;
           Serial.print("Stop by ultrasonic no.");
-          Serial.print(i);
+          Serial.print(hcSensor);
           Serial.print(" by ");
           Serial.println(val);
           //          delay(100);
         }
       } else {
         forceStop = false;
-        ultraCount[i] = 0;
+        ultraCount[hcSensor] = 0;
         if(carMode != 1){
           carMode = prevCarMode;
         }
       }
-    }
+//    } //for
     if(enableUltraLog){
       Serial.println("");
     }
@@ -160,7 +186,7 @@ void ultrasonicHandle()
 }
 
 void recieveSerial1() {
-  if (Serial1.available()) {
+  if (Serial1.available()>0) {
     serial1 = Serial1.readString();
     Serial.print("receive-ori: ");
     Serial.println(serial1);
@@ -174,31 +200,31 @@ void recieveSerial1() {
           // command here
           Serial.print("receive: ");
           Serial.println(str);
-          if (str == "R01") {
+          if (str == "R1") {
             targetState = 1;
             Serial.println("send R to NodeMCU");
             Serial1.print("R,");
             
-          } else if (str == "R02") {
+          } else if (str == "R2") {
             targetState = 2;
             Serial.println("send R to NodeMCU");
             Serial1.print("R,");
             
-          } else if (str == "R03") {
+          } else if (str == "R3") {
             targetState = 3;
             Serial.println("send R to NodeMCU");
             Serial1.print("R,");
             
-          } else if (str == "R04") {
+          } else if (str == "R4") {
             targetState = 4;
             Serial.println("send R to NodeMCU");
             Serial1.print("R,");
             
-          } else if (str == "R05") {
+          } else if (str == "R5") {
             Serial.println("send R to NodeMCU");
             targetState = 5;
             Serial1.print("R,");
-          } else if (str == "R06") {
+          } else if (str == "R6") {
             Serial.println("send R to NodeMCU");
             targetState = 6;
             Serial1.print("R,");
@@ -227,17 +253,6 @@ void stopCar()
   digitalWrite(pinL1, LOW);
   digitalWrite(pinL2, LOW);
 }
-void turnLeftBackwardFast() {
-  carDirection = "turn_left_backward";
-  analogWrite(enableR, SPEED/2);//0
-  analogWrite(enableL, SPEED);
-  
-  digitalWrite(pinR2, LOW);//x
-  digitalWrite(pinR1, HIGH);//x
-
-  digitalWrite(pinL2, HIGH);
-  digitalWrite(pinL1, LOW);
-}
 //void turnLeftBackward() {
 //  carDirection = "turn_left_backward";
 //  if (sensorB[4] == 0) {
@@ -253,16 +268,28 @@ void turnLeftBackwardFast() {
 //  digitalWrite(pinL2, HIGH);
 //  digitalWrite(pinL1, LOW);
 //}
+void turnLeftBackwardFast() {
+  carDirection = "turn_left_backward";
+  analogWrite(enableR, SPEED*(2.5/5));//0
+  analogWrite(enableL, SPEED*(4.0/5));
+  
+  digitalWrite(pinR2, HIGH);//x
+  digitalWrite(pinR1, LOW);//x
+
+  digitalWrite(pinL2, HIGH);
+  digitalWrite(pinL1, LOW);
+}
+
 void turnRightBackwardFast() {
   carDirection = "turn_right_backward";
-  analogWrite(enableR, SPEED);
-  analogWrite(enableL, SPEED/2);//0
+  analogWrite(enableR, SPEED*(4.0/5));
+  analogWrite(enableL, SPEED*(2.5/5));//0
   
   digitalWrite(pinR2, HIGH);
   digitalWrite(pinR1, LOW);
 
-  digitalWrite(pinL2, LOW);//x
-  digitalWrite(pinL1, HIGH);//x
+  digitalWrite(pinL2, HIGH);//x
+  digitalWrite(pinL1, LOW);//x
 }
 //void turnRightBackward() {
 //  carDirection = "turn_right_backward";
@@ -280,64 +307,58 @@ void turnRightBackwardFast() {
 //  digitalWrite(pinL1, LOW);
 //}
 
-//void turnRightForward() {
-//  carDirection = "turn_right_forward";
-//  if (sensorF[4] == 0) {
-//    analogWrite(enableR, 0);
-//    analogWrite(enableL, SPEED);
-//  } else {
-//    analogWrite(enableR, SPEED / 2);
-//    analogWrite(enableL, SPEED);
-//  }
-//  digitalWrite(pinR1, HIGH);
-//  digitalWrite(pinR2, LOW);
-//
-//  digitalWrite(pinL1, HIGH);
-//  digitalWrite(pinL2, LOW);
-//}
+void turnRightForward() {
+  analogWrite(enableR, SPEED*(3.5/5));//0
+  analogWrite(enableL, SPEED*(4.5/5));
+  
+  digitalWrite(pinR1, HIGH);//x
+  digitalWrite(pinR2, LOW);//x
 
-//void turnLeftForward() {
-//  carDirection = "turn_left_forward";
-//  if (sensorF[0] == 0) {
-//    analogWrite(enableR, SPEED);
-//    analogWrite(enableL, 0);
-//  } else {
-//    analogWrite(enableR, SPEED);
-//    analogWrite(enableL, SPEED / 2);
-//  }
-//  digitalWrite(pinR1, HIGH);
-//  digitalWrite(pinR2, LOW);
-//
-//  digitalWrite(pinL1, HIGH);
-//  digitalWrite(pinL2, LOW);
-//}
+  digitalWrite(pinL1, HIGH);
+  digitalWrite(pinL2, LOW);
+}
 
-void turnLeftForwardFast(){
-  analogWrite(enableR, SPEED);
-  analogWrite(enableL, SPEED/2);//0
+void turnLeftForward() {
+  analogWrite(enableR, SPEED*(4.5/5));
+  analogWrite(enableL, SPEED*(3.5/5));//0
     
   digitalWrite(pinR1, HIGH);
   digitalWrite(pinR2, LOW);
 
-  digitalWrite(pinL1, LOW);//x
-  digitalWrite(pinL2, HIGH);//x
+  digitalWrite(pinL1, HIGH);//x
+  digitalWrite(pinL2, LOW);//x
+}
+
+void turnLeftForwardFast(){
+  analogWrite(enableR, SPEED*(4.0/5));
+  analogWrite(enableL, SPEED*(1.0/5));//0
+    
+  digitalWrite(pinR1, HIGH);
+  digitalWrite(pinR2, LOW);
+
+  digitalWrite(pinL1, HIGH);//x
+  digitalWrite(pinL2, LOW);//x
 }
 void turnRightForwardFast(){
-  analogWrite(enableR, SPEED/2);//0
-  analogWrite(enableL, SPEED);
+  analogWrite(enableR, SPEED*(1.0/5));//0
+  analogWrite(enableL, SPEED*(4.0/5));
   
-  digitalWrite(pinR1, LOW);//x
-  digitalWrite(pinR2, HIGH);//x
+  digitalWrite(pinR1, HIGH);//x
+  digitalWrite(pinR2, LOW);//x
 
   digitalWrite(pinL1, HIGH);
   digitalWrite(pinL2, LOW);
 }
 void forward()
 {
-  if ((sensorF[1] == 0 && sensorF[3] != 0 ) || (sensorF[0] == 0 && sensorF[3] != 0) ) {
+  if (sensorF[0] == 0 && sensorF[3] != 0) {
     turnLeftForwardFast();
-  } else if ((sensorF[3] == 0  && sensorF[1] != 0) || (sensorF[4] == 0 && sensorF[1] != 0) ) {
+  }else if(sensorF[1] == 0 && sensorF[3] != 0 ){
+    turnLeftForward();
+  }else if (sensorF[4] == 0  && sensorF[1] != 0) {
     turnRightForwardFast();
+  }else if(sensorF[3] == 0 && sensorF[1] != 0){
+    turnRightForward();
   }else if(sensorF[0] != 0 && sensorF[1] != 0 && sensorF[2] != 0 && sensorF[3] != 0 && sensorF[4] != 0){
     if(carDirection == "turn_left_forward"){
       turnLeftForwardFast();
@@ -408,7 +429,7 @@ void updateState() {
   if (carMode == 2) {
     prevState = state;
     state++;
-    String room = "R0" + String(state) + ",";
+    String room = "R" + String(state) + ",";
     Serial1.print(room);
     
     Serial.print("state ++ is ");
@@ -419,7 +440,7 @@ void updateState() {
     if(state < 0){
       state = 0;
     }
-    String room = "R0" + String(state) + ",";
+    String room = "R" + String(state) + ",";
     Serial1.print(room);
     
     Serial.print("state -- is ");
