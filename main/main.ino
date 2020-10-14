@@ -32,7 +32,7 @@ int PINsensorB[5] = {A8, A9, A9, A10, A11};
 
 int carMode = 1;// 1 stop, 2 move forward, 3 move backward 
 
-int SPEED = 255;
+int SPEED = 255; // 50 -255
 int prevState = 0;
 int targetState = 0;
 int x = 0;
@@ -253,25 +253,10 @@ void stopCar()
   digitalWrite(pinL1, LOW);
   digitalWrite(pinL2, LOW);
 }
-//void turnLeftBackward() {
-//  carDirection = "turn_left_backward";
-//  if (sensorB[4] == 0) {
-//    analogWrite(enableR, 0);
-//    analogWrite(enableL, SPEED);
-//  } else {
-//    analogWrite(enableR, SPEED / 2);
-//    analogWrite(enableL, SPEED);
-//  }
-//  digitalWrite(pinR2, HIGH);
-//  digitalWrite(pinR1, LOW);
-//
-//  digitalWrite(pinL2, HIGH);
-//  digitalWrite(pinL1, LOW);
-//}
-void turnLeftBackwardFast() {
+void turnLeftBackward() {
   carDirection = "turn_left_backward";
-  analogWrite(enableR, SPEED*(2.5/5));//0
-  analogWrite(enableL, SPEED*(4.0/5));
+  analogWrite(enableR, SPEED*(4.0/5.0));//0
+  analogWrite(enableL, SPEED*(4.0/5.0));
   
   digitalWrite(pinR2, HIGH);//x
   digitalWrite(pinR1, LOW);//x
@@ -279,11 +264,33 @@ void turnLeftBackwardFast() {
   digitalWrite(pinL2, HIGH);
   digitalWrite(pinL1, LOW);
 }
+void turnLeftBackwardFast() {
+  carDirection = "turn_left_backward";
+  analogWrite(enableR, SPEED*(0.0/5));//0
+  analogWrite(enableL, SPEED*(5.0/5));
+  
+  digitalWrite(pinR2, LOW);//x
+  digitalWrite(pinR1, HIGH);//x
+
+  digitalWrite(pinL2, HIGH);
+  digitalWrite(pinL1, LOW);
+}
 
 void turnRightBackwardFast() {
   carDirection = "turn_right_backward";
+  analogWrite(enableR, SPEED*(5.0/5));
+  analogWrite(enableL, SPEED*(0.0/5));//0
+  
+  digitalWrite(pinR2, HIGH);
+  digitalWrite(pinR1, LOW);
+
+  digitalWrite(pinL2, LOW);//x
+  digitalWrite(pinL1, HIGH);//x
+}
+void turnRightBackward() {
+  carDirection = "turn_right_backward";
   analogWrite(enableR, SPEED*(4.0/5));
-  analogWrite(enableL, SPEED*(2.5/5));//0
+  analogWrite(enableL, SPEED*(4.0/5));//0
   
   digitalWrite(pinR2, HIGH);
   digitalWrite(pinR1, LOW);
@@ -291,21 +298,6 @@ void turnRightBackwardFast() {
   digitalWrite(pinL2, HIGH);//x
   digitalWrite(pinL1, LOW);//x
 }
-//void turnRightBackward() {
-//  carDirection = "turn_right_backward";
-//  if (sensorB[0] == 0) {
-//    analogWrite(enableR, SPEED);
-//    analogWrite(enableL, 0);
-//  } else {
-//    analogWrite(enableR, SPEED);
-//    analogWrite(enableL, SPEED / 2);
-//  }
-//  digitalWrite(pinR2, HIGH);
-//  digitalWrite(pinR1, LOW);
-//
-//  digitalWrite(pinL2, HIGH);
-//  digitalWrite(pinL1, LOW);
-//}
 
 void turnRightForward() {
   analogWrite(enableR, SPEED*(3.5/5));//0
@@ -381,11 +373,16 @@ void forward()
 
 void backward()
 {
-  if ((sensorB[1] == 0 && sensorB[3] != 0) || (sensorB[0] == 0 && sensorB[3] != 0)) {
+  if (sensorB[0] == 0 && sensorB[3] != 0) {
     turnLeftBackwardFast();
-  } else if ((sensorB[3] == 0  && sensorB[1] != 0) || (sensorB[4] == 0  && sensorB[1] != 0)) {
+  }else if(sensorB[1] == 0 && sensorB[3] != 0){
+    turnLeftBackward();
+  }else if (sensorB[4] == 0  && sensorB[1] != 0) {
     turnRightBackwardFast();
-  }else if(sensorB[0] != 0 && sensorB[1] != 0 && sensorB[2] != 0 && sensorB[3] != 0 && sensorB[4] != 0){
+  }else if(sensorB[3] == 0  && sensorB[1] != 0){
+    turnRightBackward();
+  }
+  else if(sensorB[0] != 0 && sensorB[1] != 0 && sensorB[2] != 0 && sensorB[3] != 0 && sensorB[4] != 0){
     if(carDirection == "turn_left_backward"){
       turnLeftBackwardFast();
     }else{
@@ -393,8 +390,8 @@ void backward()
     }
   }else{
     carDirection = "backward";
-    analogWrite(enableR, SPEED);
-    analogWrite(enableL, SPEED);
+    analogWrite(enableR, SPEED*(4.0/5));
+    analogWrite(enableL, SPEED*(4.0/5));
   
     digitalWrite(pinR2, HIGH);
     digitalWrite(pinR1, LOW);
@@ -409,6 +406,8 @@ boolean getStopSensorByDirection() {
     return sensorF[0] == 0 && sensorF[1] == 0 && sensorF[2] == 0 && sensorF[3] == 0 && sensorF[4] == 0;
   } else if (carMode == 3) {
     return sensorB[0] == 0 && sensorB[1] == 0 && sensorB[2] == 0 && sensorB[3] == 0 && sensorB[4] == 0;
+  }else{
+    return true;
   }
 }
 

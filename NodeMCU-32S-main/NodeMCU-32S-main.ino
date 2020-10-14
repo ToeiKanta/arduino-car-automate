@@ -19,9 +19,9 @@ boolean DEBUG_LOG = true;
 #define TokenLineRoom6 "dCfpnmQMxAtgEoj7g2zdl6Cg8jZ98ry80TNEbDQdBcG"
 //const int resetMegaPin = 34;
 
-char auth[] = "YpzVX9uZtN0lnd6cnyWbFJAMC7bAihIe";
-char ssid[] = "Euangngam710";//"gkamspri"; // Euangngam710
-char pass[] = "enplace710";//0979934765; // enplace710
+char auth[] = "WXrEvLjD8evnjaNTnNy0EvnDhfFGfiUj";//"YpzVX9uZtN0lnd6cnyWbFJAMC7bAihIe";
+char ssid[] = "gkamspri";//"gkamspri"; // Euangngam710
+char pass[] = "0979934765";//0979934765; // enplace710
 
 BlynkTimer timer;
 boolean isMegaConnected = false;
