@@ -32,7 +32,7 @@ int PINsensorB[5] = {A8, A9, A9, A10, A11};
 
 int carMode = 1;// 1 stop, 2 move forward, 3 move backward 
 
-int SPEED = 255; // 50 -255
+int SPEED = 155; // 50 -255
 int prevState = 0;
 int targetState = 0;
 int x = 0;
@@ -69,6 +69,7 @@ void setup() {
   }
   Serial.println("start");
   Serial1.print("start,");
+
  
 }
 
@@ -127,6 +128,7 @@ void loop() {
       }
     }
   }
+  
   if(carMode == 1 || forceStop == true){
     stopCar();
   }else if(carMode == 2){
@@ -169,6 +171,12 @@ void ultrasonicHandle()
           Serial.print(hcSensor);
           Serial.print(" by ");
           Serial.println(val);
+          if(hcSensor == 0){
+            Serial1.print("STOP BY ULTRA FRONT,");
+          }else if(hcSensor == 1){
+            Serial1.print("STOP BY ULTRA BACK,");
+          }
+          
           //          delay(100);
         }
       } else {
@@ -253,17 +261,7 @@ void stopCar()
   digitalWrite(pinL1, LOW);
   digitalWrite(pinL2, LOW);
 }
-void turnLeftBackward() {
-  carDirection = "turn_left_backward";
-  analogWrite(enableR, SPEED*(4.0/5.0));//0
-  analogWrite(enableL, SPEED*(4.0/5.0));
-  
-  digitalWrite(pinR2, HIGH);//x
-  digitalWrite(pinR1, LOW);//x
 
-  digitalWrite(pinL2, HIGH);
-  digitalWrite(pinL1, LOW);
-}
 void turnLeftBackwardFast() {
   carDirection = "turn_left_backward";
   analogWrite(enableR, SPEED*(0.0/5));//0
@@ -287,10 +285,21 @@ void turnRightBackwardFast() {
   digitalWrite(pinL2, LOW);//x
   digitalWrite(pinL1, HIGH);//x
 }
+void turnLeftBackward() {
+  carDirection = "turn_left_backward";
+  analogWrite(enableR, SPEED*(2.0/5.0));//0
+  analogWrite(enableL, SPEED*(4.0/5.0));
+  
+  digitalWrite(pinR2, HIGH);//x
+  digitalWrite(pinR1, LOW);//x
+
+  digitalWrite(pinL2, HIGH);
+  digitalWrite(pinL1, LOW);
+}
 void turnRightBackward() {
   carDirection = "turn_right_backward";
   analogWrite(enableR, SPEED*(4.0/5));
-  analogWrite(enableL, SPEED*(4.0/5));//0
+  analogWrite(enableL, SPEED*(2.0/5));//0
   
   digitalWrite(pinR2, HIGH);
   digitalWrite(pinR1, LOW);
@@ -390,8 +399,8 @@ void backward()
     }
   }else{
     carDirection = "backward";
-    analogWrite(enableR, SPEED*(4.0/5));
-    analogWrite(enableL, SPEED*(4.0/5));
+    analogWrite(enableR, SPEED);
+    analogWrite(enableL, SPEED);
   
     digitalWrite(pinR2, HIGH);
     digitalWrite(pinR1, LOW);
@@ -403,9 +412,9 @@ void backward()
 
 boolean getStopSensorByDirection() {
   if (carMode == 2) {
-    return sensorF[0] == 0 && sensorF[1] == 0 && sensorF[2] == 0 && sensorF[3] == 0 && sensorF[4] == 0;
+    return (sensorF[0] == 0 && sensorF[4] == 0);
   } else if (carMode == 3) {
-    return sensorB[0] == 0 && sensorB[1] == 0 && sensorB[2] == 0 && sensorB[3] == 0 && sensorB[4] == 0;
+    return (sensorB[0] == 0 && sensorB[4] == 0);
   }else{
     return true;
   }
@@ -418,7 +427,7 @@ void checkStopLocation()
       isAtStopLocationYet = true;
       updateState();
     }
-  } else if (!getStopSensorByDirection()) {
+  } else if (getStopSensorByDirection() == false) {
     isAtStopLocationYet = false;
   }
 
@@ -439,6 +448,7 @@ void updateState() {
     if(state < 0){
       state = 0;
     }
+    delay(100);
     String room = "R" + String(state) + ",";
     Serial1.print(room);
     

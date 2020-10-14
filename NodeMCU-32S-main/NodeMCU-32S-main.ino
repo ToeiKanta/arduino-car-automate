@@ -1,3 +1,5 @@
+// Tools / Board: NodeMCU-32s
+
 /* Comment this out to disable prints and save space */
 #define BLYNK_PRINT Serial
 
@@ -20,8 +22,8 @@ boolean DEBUG_LOG = true;
 //const int resetMegaPin = 34;
 
 char auth[] = "WXrEvLjD8evnjaNTnNy0EvnDhfFGfiUj";//"YpzVX9uZtN0lnd6cnyWbFJAMC7bAihIe";
-char ssid[] = "gkamspri";//"gkamspri"; // Euangngam710
-char pass[] = "0979934765";//0979934765; // enplace710
+char ssid[] = "masmelos";//"gkamspri"; // Euangngam710
+char pass[] = "0123456789";//0979934765; // enplace710
 
 BlynkTimer timer;
 boolean isMegaConnected = false;
